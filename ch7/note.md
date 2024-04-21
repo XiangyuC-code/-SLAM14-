@@ -98,11 +98,73 @@ imshow("matches", img_match);
 
 匹配结果存储在matches中，matches的数据格式是元素为DMatch的vector，保存了两个匹配的描述子的索引，以及相应的距离：
 ```cpp
-matches[0].quertIdx  //查询描述子的索引，与descriptor1的元素相对应
+matches[0].queryIdx  //查询描述子的索引，与descriptor1的元素相对应
 matches[0].trainIdx  //与queryIdx匹配的描述子的索引，与descriptor2的元素相对应
 matches[0].distance  //query和train两个描述子的距离
 ```
 
+# cv::findFundamentalMat()
+
+求基础矩阵F，函数原型：
+```cpp
+Mat findFundamentalMat(InputArray points1, InputArray points2, int method=FM_RANSAC, double param1=3., double param2=0.99, OutputArray mask=noArray() )
+
+// 参数
+// points1, 第一幅图像点的数组
+// points2, 第二幅图像点的数组, points1和points2为点的像素坐标，形式为[u, v, 1]^T
+// method = FM_RANSAC, RANSAC 算法
+// param1 = 3., 点到对极线的最大距离，超过这个值的点将被舍弃
+// param2 = 0.99, 矩阵正确的可信度
+// mask = noArray() 内点向量索引
+
+```
+
+# cv::findEssentialMat()
+求本质矩阵E，函数原型:
+```cpp
+// 形式1
+Mat findEssentialMat( InputArray points1, InputArray points2,
+                      InputArray cameraMatrix, int method = RANSAC,
+                      double prob = 0.999, double threshold = 1.0,
+                      OutputArray mask = noArray() );
+
+// 参数
+// points1, 第一幅图像点的数组
+// points2, 第二幅图像点的数组, points1和points2为点的像素坐标，形式为[u, v, 1]^T
+// cameraMatrix, 相机内参矩阵
+// method = RANSAC, RANSAC 算法
+// prob 估计矩阵正确的可信度（概率），仅用于RANSAC或LMedS方法的参数；
+// threshold 用于RANSAC的参数。 它是从点到极线的最大距离（以像素为单位）；超出此距离时，该点被视为异常值，不用于计算最终的基本矩阵。 根据点定位精度、图像分辨率和图像噪声的不同，可将其设置为1~3；
+// mask = noArray() 内点向量索引
+
+// 形式2
+Mat findEssentialMat( InputArray points1, InputArray points2,
+                      double focal=1.0, Point2d pp = Point2d(0,0),
+                      int method = RANSAC, double prob = 0.999, 
+                      double threshold = 1.0, OutputArray mask = noArray() );
+
+// focal和pp分别表示相机焦距和光心坐标，可以由内参矩阵计算得到。
+// focal = (cameraMatrix.at<double>(0, 0) + cameraMatrix.at<double>(1, 1)) / 2
+// pp.x = cameraMatrix.at<double>(0, 2),  pp.y = cameraMatrix.at<double>(1, 2)
+```
+# cv::recoverPose()
+计算相机由位姿1到位姿2的旋转和平移矩阵，函数原型:
+```cpp
+// 形式1
+int cv::recoverPose	( InputArray E, InputArray points1,
+                      InputArray points2, InputArray cameraMatrix,
+                      OutputArray R, OutputArray t,
+                      InputOutputArray mask = noArray() );
+
+// E为本质矩阵， R为输出的旋转矩阵， t为输出的位移矩阵。 其他参数与findEssentialMat含义相同。
+
+// 形式2
+int cv::recoverPose	( InputArray E, InputArray points1,
+                      InputArray points2, OutputArray R, 
+                      OutputArray t, double focal=1.0, 
+                      Point2d pp = Point2d(0,0), InputOutputArray mask = noArray() );
+
+```
 
 参考:<br>
 https://www.cnblogs.com/qq21497936/p/13184583.html
